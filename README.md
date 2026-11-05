@@ -177,7 +177,7 @@ agora_market_app/
 ### Prerequisites
 - Flutter SDK 3.27+ (Channel Stable)
 - Dart SDK 3.6+
-- Android Studio / Xcode / VS Code
+- Android Studio (Android API 21 through API 36 support) / Xcode (iOS 13+) / VS Code
 
 ### Installation & Run
 

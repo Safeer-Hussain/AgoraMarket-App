@@ -3,7 +3,7 @@
 ## Project: AgoraMarket
 ### High-Performance Vertical Video Job & Service Marketplace
 **Architect & Engineering Lead:** Safeer Hussain  
-**Platform Target:** Flutter (Android API 21-35, iOS 13+, Web, Desktop)  
+**Platform Target:** Flutter (Android API 21-36, iOS 13+, Web, Desktop)  
 **State Architecture:** Feature-First Clean Architecture + MVVM (Provider, GetIt, SQLite, SharedPreferences)  
 **Repository:** https://github.com/Safeer-Hussain/AgoraMarket-App  
 

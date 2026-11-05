@@ -11,7 +11,7 @@
 - Initialize Flutter project with feature-first Clean Architecture directory hierarchy.
 - Configure `pubspec.yaml` with production dependencies (`provider`, `get_it`, `sqflite`, `dio`, `flutter_map`, `fl_chart`, `connectivity_plus`, `shared_preferences`).
 - Setup custom launcher icons and branded asset hierarchy.
-- Deliverable: Clean compile on Android API 35 and iOS 13+.
+- Deliverable: Clean compile on Android API 36 and iOS 13+.
 
 ### Sprint 02: Dynamic Theme System & Color Scheme Parity
 - Implement Obsidian Dark and Crisp Light Material 3 color palettes in `AppTheme`.
