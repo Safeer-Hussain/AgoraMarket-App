@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -13,50 +14,72 @@ import 'presentation/map/map_filter_provider.dart';
 import 'presentation/profile/profile_provider.dart';
 import 'presentation/splash/splash_view.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() {
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
-    ),
-  );
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.presentError(details);
+      debugPrint('FlutterError caught: ${details.exceptionAsString()}');
+    };
 
-  await initDependencies();
-  RenderLatencyMonitor().initialize();
+    try {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: Colors.transparent,
+        ),
+      );
+    } catch (e) {
+      debugPrint('SystemChrome initialization notice: $e');
+    }
 
-  final prefs = sl<SharedPreferences>();
+    SharedPreferences? prefs;
+    try {
+      await initDependencies();
+      if (sl.isRegistered<SharedPreferences>()) {
+        prefs = sl<SharedPreferences>();
+      }
+    } catch (e, stack) {
+      debugPrint('Dependency initialization notice: $e\n$stack');
+    }
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider(prefs: prefs)),
-        ChangeNotifierProvider.value(value: sl<RenderLatencyMonitor>()),
-        ChangeNotifierProvider(
-          create: (_) => VideoFeedProvider(repository: sl()),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => MapFilterProvider(repository: sl()),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ChatProvider(repository: sl()),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => AiConciergeProvider(database: sl()),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ProfileProvider(
-            profileRepository: sl(),
-            marketplaceRepository: sl(),
-            prefs: prefs,
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ThemeProvider(prefs: prefs)),
+          ChangeNotifierProvider.value(
+            value: sl.isRegistered<RenderLatencyMonitor>()
+                ? sl<RenderLatencyMonitor>()
+                : RenderLatencyMonitor(),
           ),
-        ),
-      ],
-      child: const AgoraMarketApp(),
-    ),
-  );
+          ChangeNotifierProvider(
+            create: (_) => VideoFeedProvider(repository: sl()),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => MapFilterProvider(repository: sl()),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => ChatProvider(repository: sl()),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => AiConciergeProvider(database: sl()),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => ProfileProvider(
+              profileRepository: sl(),
+              marketplaceRepository: sl(),
+              prefs: prefs,
+            ),
+          ),
+        ],
+        child: const AgoraMarketApp(),
+      ),
+    );
+  }, (error, stackTrace) {
+    debugPrint('Uncaught asynchronous zone error: $error\n$stackTrace');
+  });
 }
 
 class AgoraMarketApp extends StatelessWidget {

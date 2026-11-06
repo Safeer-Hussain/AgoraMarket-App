@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/database/app_database.dart';
+import '../../core/di/injection_container.dart';
 import '../../core/performance/render_latency_monitor.dart';
 import '../navigation/adaptive_scaffold.dart';
 
@@ -33,40 +35,77 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
     );
 
     _animController.forward();
-    _runBootSequence();
+
+    // Defer boot sequence to post-frame callback ensuring the Flutter engine mounts UI first
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _runBootSequence();
+      }
+    });
   }
 
   Future<void> _runBootSequence() async {
-    // 1. Initial pre-cache
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    final monitor = Provider.of<RenderLatencyMonitor>(context, listen: false);
-    await monitor.preCacheFeedAssets(context);
-
-    // 2. Mounting SQLite and index
-    if (!mounted) return;
-    setState(() {
-      _statusText = 'Mounting SQLite messaging & spatial index...';
-    });
-
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
-    setState(() {
-      _statusText = 'AgoraMarket Ready.';
-    });
-
-    await Future.delayed(const Duration(milliseconds: 300));
     if (!mounted) return;
 
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (context, animation, secondaryAnimation) => const AdaptiveScaffold(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
+    try {
+      // 1. Initialize RenderLatencyMonitor timing callbacks after first frame mounts
+      try {
+        final monitor = Provider.of<RenderLatencyMonitor>(context, listen: false);
+        monitor.initialize();
+      } catch (e) {
+        debugPrint('RenderLatencyMonitor initialize warning: $e');
+      }
+
+      // 2. Safe asset pre-caching with error handling
+      if (!mounted) return;
+      try {
+        final monitor = Provider.of<RenderLatencyMonitor>(context, listen: false);
+        await monitor.preCacheFeedAssets(context);
+      } catch (e) {
+        debugPrint('Asset pre-cache warning: $e');
+      }
+
+      // 3. Warm up SQLite database and verify spatial indices
+      if (!mounted) return;
+      setState(() {
+        _statusText = 'Mounting SQLite messaging & spatial index...';
+      });
+
+      try {
+        if (sl.isRegistered<AppDatabase>()) {
+          await sl<AppDatabase>().database;
+        }
+      } catch (e) {
+        debugPrint('Database warmup warning: $e');
+      }
+
+      await Future.delayed(const Duration(milliseconds: 350));
+      if (!mounted) return;
+
+      setState(() {
+        _statusText = 'AgoraMarket Ready.';
+      });
+
+      await Future.delayed(const Duration(milliseconds: 250));
+      if (!mounted) return;
+
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (context, animation, secondaryAnimation) => const AdaptiveScaffold(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      );
+    } catch (e, stack) {
+      debugPrint('Startup sequence warning: $e\n$stack');
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const AdaptiveScaffold()),
+        );
+      }
+    }
   }
 
   @override

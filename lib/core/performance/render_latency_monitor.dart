@@ -73,7 +73,17 @@ class RenderLatencyMonitor extends ChangeNotifier {
       ];
 
       for (final asset in assets) {
-        await precacheImage(AssetImage(asset), context);
+        try {
+          await precacheImage(
+            AssetImage(asset),
+            context,
+            onError: (exception, stackTrace) {
+              debugPrint('Asset precache ignored for $asset: $exception');
+            },
+          );
+        } catch (e) {
+          debugPrint('Precache exception for $asset: $e');
+        }
       }
       _isPreCached = true;
       notifyListeners();

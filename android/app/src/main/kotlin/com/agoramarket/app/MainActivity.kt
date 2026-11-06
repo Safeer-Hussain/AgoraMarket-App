@@ -1,4 +1,4 @@
-package com.example.agora_market_app
+package com.agoramarket.app
 
 import io.flutter.embedding.android.FlutterActivity
 
