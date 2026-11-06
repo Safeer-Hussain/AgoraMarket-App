@@ -54,13 +54,18 @@ class _VideoReelCanvasState extends State<VideoReelCanvas> with SingleTickerProv
       }
     }
 
-    return GestureDetector(
-      onTap: () {
-        feedProvider.togglePlayPause();
-      },
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
+    return Semantics(
+      button: true,
+      label: feedProvider.isPlaying
+          ? 'Pause video pitch for ${widget.pitch.title}'
+          : 'Play video pitch for ${widget.pitch.title}',
+      child: GestureDetector(
+        onTap: () {
+          feedProvider.togglePlayPause();
+        },
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
           // Background thumbnail with subtle zoom
           Image.asset(
             widget.pitch.thumbnailAsset,
@@ -145,43 +150,55 @@ class _VideoReelCanvasState extends State<VideoReelCanvas> with SingleTickerProv
             right: 16,
             child: Row(
               children: [
-                InkWell(
-                  onTap: () => feedProvider.cyclePlaybackSpeed(),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.75),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: colorScheme.outlineVariant),
-                    ),
-                    child: Text(
-                      '${feedProvider.playbackSpeed}x',
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                Semantics(
+                  button: true,
+                  label: 'Playback speed: ${feedProvider.playbackSpeed}x. Tap to change.',
+                  child: InkWell(
+                    onTap: () => feedProvider.cyclePlaybackSpeed(),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.75),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: colorScheme.outlineVariant),
+                      ),
+                      child: Text(
+                        '${feedProvider.playbackSpeed}x',
+                        style: TextStyle(
+                          color: colorScheme.onSurface,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                InkWell(
-                  onTap: () => feedProvider.toggleMute(),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.75),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: colorScheme.outlineVariant),
-                    ),
-                    child: Icon(
-                      feedProvider.isMuted
-                          ? Icons.volume_off_rounded
-                          : Icons.volume_up_rounded,
-                      size: 16,
-                      color: colorScheme.onSurface,
+                Semantics(
+                  button: true,
+                  label: feedProvider.isMuted ? 'Unmute pitch audio' : 'Mute pitch audio',
+                  child: InkWell(
+                    onTap: () => feedProvider.toggleMute(),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.75),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: colorScheme.outlineVariant),
+                      ),
+                      child: Icon(
+                        feedProvider.isMuted
+                            ? Icons.volume_off_rounded
+                            : Icons.volume_up_rounded,
+                        size: 16,
+                        color: colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
@@ -213,22 +230,33 @@ class _VideoReelCanvasState extends State<VideoReelCanvas> with SingleTickerProv
             left: 0,
             right: 0,
             bottom: 0,
-            child: GestureDetector(
-              onHorizontalDragUpdate: (details) {
-                final box = context.findRenderObject() as RenderBox?;
-                if (box != null) {
-                  final progress = (details.localPosition.dx / box.size.width).clamp(0.0, 1.0);
-                  feedProvider.setPlaybackProgress(progress);
-                }
-              },
-              child: Container(
-                height: 6,
-                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: feedProvider.playbackProgress,
+            child: Semantics(
+              slider: true,
+              label: 'Video pitch playback scrubber',
+              value: '${(feedProvider.playbackProgress * 100).toInt()}%',
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onHorizontalDragUpdate: (details) {
+                  final box = context.findRenderObject() as RenderBox?;
+                  if (box != null) {
+                    final progress = (details.localPosition.dx / box.size.width).clamp(0.0, 1.0);
+                    feedProvider.setPlaybackProgress(progress);
+                  }
+                },
+                child: Container(
+                  height: 16,
+                  alignment: Alignment.bottomCenter,
+                  color: Colors.transparent,
                   child: Container(
-                    color: colorScheme.primary,
+                    height: 5,
+                    color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: feedProvider.playbackProgress,
+                      child: Container(
+                        color: colorScheme.primary,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -236,6 +264,7 @@ class _VideoReelCanvasState extends State<VideoReelCanvas> with SingleTickerProv
           ),
         ],
       ),
+    ),
     );
   }
 }

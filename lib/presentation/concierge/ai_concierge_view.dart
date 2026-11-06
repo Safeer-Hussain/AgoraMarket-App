@@ -421,6 +421,7 @@ class _AiMatchConciergeViewState extends State<AiMatchConciergeView> {
             ),
             const SizedBox(width: 8),
             IconButton.filled(
+              tooltip: 'Send prompt to AI marketplace concierge',
               style: IconButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,

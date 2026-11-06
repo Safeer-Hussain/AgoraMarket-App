@@ -59,6 +59,7 @@ class UserProfileView extends StatelessWidget {
           ),
           floatingActionButton: FloatingActionButton(
             heroTag: 'fab_profile_portfolio',
+            tooltip: 'Add new verified case study portfolio item',
             mini: isLandscape,
             backgroundColor: colorScheme.primary,
             foregroundColor: colorScheme.onPrimary,
@@ -328,16 +329,20 @@ class UserProfileView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Switch(
-                  value: profile.isAvailable,
-                  activeThumbColor: colorScheme.primary,
-                  onChanged: (val) {
-                    provider.toggleAvailability(val);
-                    AppFeedback.showSuccess(
-                      context,
-                      val ? 'Availability set to Open' : 'Availability set to Booked',
-                    );
-                  },
+                Semantics(
+                  toggled: profile.isAvailable,
+                  label: 'Toggle contract availability status. Currently ${profile.isAvailable ? "Open for contracts" : "Booked"}',
+                  child: Switch(
+                    value: profile.isAvailable,
+                    activeThumbColor: colorScheme.primary,
+                    onChanged: (val) {
+                      provider.toggleAvailability(val);
+                      AppFeedback.showSuccess(
+                        context,
+                        val ? 'Availability set to Open' : 'Availability set to Booked',
+                      );
+                    },
+                  ),
                 ),
               ],
             ),

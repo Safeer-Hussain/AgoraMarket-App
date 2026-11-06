@@ -51,6 +51,7 @@ class _TalentMapViewState extends State<TalentMapView> {
             children: [
               FloatingActionButton.small(
                 heroTag: 'fab_map_filter',
+                tooltip: 'Filter map talent and radius',
                 backgroundColor: colorScheme.surfaceContainerHighest,
                 foregroundColor: colorScheme.onSurface,
                 onPressed: () => MapFilterSheet.show(context),
@@ -59,6 +60,7 @@ class _TalentMapViewState extends State<TalentMapView> {
               const SizedBox(height: 10),
               FloatingActionButton(
                 heroTag: 'fab_map_recenter',
+                tooltip: 'Recenter map to tech hub',
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
                 onPressed: () {
@@ -248,33 +250,37 @@ class _TalentMapViewState extends State<TalentMapView> {
           point: LatLng(pitch.latitude, pitch.longitude),
           width: isSel ? 52 : 42,
           height: isSel ? 52 : 42,
-          child: GestureDetector(
-            onTap: () {
-              mapProvider.selectPitch(pitch);
-              _mapController.move(LatLng(pitch.latitude, pitch.longitude), 14.0);
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              decoration: BoxDecoration(
-                color: isSel ? pinColor : colorScheme.surfaceContainerHighest,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSel ? colorScheme.onPrimary : pinColor,
-                  width: isSel ? 2.5 : 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(alpha: 0.4),
-                    blurRadius: isSel ? 12 : 6,
-                    offset: const Offset(0, 2),
+          child: Semantics(
+            button: true,
+            label: '${pitch.creatorName}, ${pitch.role}, \$${pitch.hourlyRate.toStringAsFixed(0)} per hour in ${pitch.locationName}',
+            child: GestureDetector(
+              onTap: () {
+                mapProvider.selectPitch(pitch);
+                _mapController.move(LatLng(pitch.latitude, pitch.longitude), 14.0);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                decoration: BoxDecoration(
+                  color: isSel ? pinColor : colorScheme.surfaceContainerHighest,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSel ? colorScheme.onPrimary : pinColor,
+                    width: isSel ? 2.5 : 2,
                   ),
-                ],
-              ),
-              child: Center(
-                child: CircleAvatar(
-                  radius: isSel ? 18 : 14,
-                  backgroundColor: colorScheme.surfaceContainer,
-                  backgroundImage: AssetImage(pitch.creatorAvatar),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.shadow.withValues(alpha: 0.4),
+                      blurRadius: isSel ? 12 : 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: CircleAvatar(
+                    radius: isSel ? 18 : 14,
+                    backgroundColor: colorScheme.surfaceContainer,
+                    backgroundImage: AssetImage(pitch.creatorAvatar),
+                  ),
                 ),
               ),
             ),
@@ -366,6 +372,7 @@ class _TalentMapViewState extends State<TalentMapView> {
               ),
               if (_searchController.text.isNotEmpty)
                 IconButton(
+                  tooltip: 'Clear search query',
                   icon: Icon(Icons.clear_rounded, size: 18, color: colorScheme.outline),
                   onPressed: () {
                     _searchController.clear();
@@ -373,6 +380,7 @@ class _TalentMapViewState extends State<TalentMapView> {
                   },
                 ),
               IconButton(
+                tooltip: 'Open map filter and radius settings',
                 icon: Icon(Icons.tune_rounded, size: 20, color: colorScheme.onSurface),
                 onPressed: () => MapFilterSheet.show(context),
               ),

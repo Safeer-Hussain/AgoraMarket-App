@@ -63,6 +63,7 @@ class _VideoFeedViewState extends State<VideoFeedView> {
           backgroundColor: colorScheme.surface,
           floatingActionButton: FloatingActionButton(
             heroTag: 'fab_video_pitch_create',
+            tooltip: 'Publish new video pitch',
             mini: isLandscape,
             backgroundColor: colorScheme.primary,
             foregroundColor: colorScheme.onPrimary,

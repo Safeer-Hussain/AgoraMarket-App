@@ -70,6 +70,7 @@ class _ChatConversationViewState extends State<ChatConversationView> {
               children: [
                 if (!widget.isPane)
                   IconButton(
+                    tooltip: 'Back to conversations',
                     icon: Icon(Icons.arrow_back_rounded, color: colorScheme.onSurface),
                     onPressed: () => Navigator.of(context).pop(),
                   )
@@ -273,6 +274,7 @@ class _ChatConversationViewState extends State<ChatConversationView> {
                   ),
                   const SizedBox(width: 8),
                   IconButton.filled(
+                    tooltip: 'Send message',
                     style: IconButton.styleFrom(
                       backgroundColor: colorScheme.primary,
                       foregroundColor: colorScheme.onPrimary,

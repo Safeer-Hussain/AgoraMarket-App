@@ -38,25 +38,35 @@ class VideoOverlayHud extends StatelessWidget {
                       backgroundImage: AssetImage(pitch.creatorAvatar),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      pitch.creatorName,
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        shadows: [
-                          Shadow(
-                            color: colorScheme.shadow.withValues(alpha: 0.6),
-                            blurRadius: 4,
+                    Expanded(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              pitch.creatorName,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: colorScheme.onSurface,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                shadows: [
+                                  Shadow(
+                                    color: colorScheme.shadow.withValues(alpha: 0.6),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.verified_rounded,
+                            size: 14,
+                            color: colorScheme.primary,
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.verified_rounded,
-                      size: 14,
-                      color: colorScheme.primary,
                     ),
                     const SizedBox(width: 8),
                     Container(
@@ -197,6 +207,9 @@ class VideoOverlayHud extends StatelessWidget {
                 icon: pitch.isLiked ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
                 iconColor: pitch.isLiked ? colorScheme.error : colorScheme.onSurface,
                 label: pitch.likesCount.toString(),
+                semanticLabel: pitch.isLiked
+                    ? 'Unlike pitch. Current likes: ${pitch.likesCount}'
+                    : 'Like pitch. Current likes: ${pitch.likesCount}',
                 onTap: () => feedProvider.toggleLike(pitch.id),
               ),
               const SizedBox(height: 14),
@@ -206,6 +219,9 @@ class VideoOverlayHud extends StatelessWidget {
                 icon: pitch.isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
                 iconColor: pitch.isBookmarked ? colorScheme.tertiary : colorScheme.onSurface,
                 label: pitch.bookmarksCount.toString(),
+                semanticLabel: pitch.isBookmarked
+                    ? 'Remove bookmark. Current bookmarks: ${pitch.bookmarksCount}'
+                    : 'Bookmark pitch. Current bookmarks: ${pitch.bookmarksCount}',
                 onTap: () => feedProvider.toggleBookmark(pitch.id),
               ),
               const SizedBox(height: 14),
@@ -215,6 +231,7 @@ class VideoOverlayHud extends StatelessWidget {
                 icon: Icons.chat_bubble_outline_rounded,
                 iconColor: colorScheme.onSurface,
                 label: 'Discuss',
+                semanticLabel: 'Open discussion comments for ${pitch.title}',
                 onTap: () => CommentSheet.show(context, pitch.id),
               ),
               const SizedBox(height: 14),
@@ -224,41 +241,47 @@ class VideoOverlayHud extends StatelessWidget {
                 icon: Icons.share_outlined,
                 iconColor: colorScheme.onSurface,
                 label: 'Share',
+                semanticLabel: 'Share pitch: ${pitch.title}',
                 onTap: () => ShareSheet.show(context, pitch),
               ),
               const SizedBox(height: 14),
 
               // Hire / Apply CTA
-              InkWell(
-                onTap: () => HireModal.show(context, pitch),
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.primary.withValues(alpha: 0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.handshake_outlined, size: 14, color: colorScheme.onPrimary),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Hire',
-                        style: TextStyle(
-                          color: colorScheme.onPrimary,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
+              Semantics(
+                button: true,
+                label: 'Hire specialist ${pitch.creatorName}',
+                child: InkWell(
+                  onTap: () => HireModal.show(context, pitch),
+                  borderRadius: BorderRadius.circular(24),
+                  child: Container(
+                    constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colorScheme.primary.withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.handshake_outlined, size: 14, color: colorScheme.onPrimary),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Hire',
+                          style: TextStyle(
+                            color: colorScheme.onPrimary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -275,49 +298,59 @@ class _ActionButton extends StatelessWidget {
   final Color iconColor;
   final String label;
   final VoidCallback onTap;
+  final String? semanticLabel;
 
   const _ActionButton({
     required this.icon,
     required this.iconColor,
     required this.label,
     required this.onTap,
+    this.semanticLabel,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
-              shape: BoxShape.circle,
-              border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
-            ),
-            child: Icon(icon, size: 22, color: iconColor),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            style: TextStyle(
-              color: colorScheme.onSurface,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              shadows: [
-                Shadow(
-                  color: colorScheme.shadow.withValues(alpha: 0.7),
-                  blurRadius: 4,
+    return Semantics(
+      button: true,
+      label: semanticLabel ?? label,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.7),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
                 ),
-              ],
-            ),
+                child: Icon(icon, size: 22, color: iconColor),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  shadows: [
+                    Shadow(
+                      color: colorScheme.shadow.withValues(alpha: 0.7),
+                      blurRadius: 4,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

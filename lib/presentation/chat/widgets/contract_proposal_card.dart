@@ -206,44 +206,52 @@ class ContractProposalCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: colorScheme.primary,
-                      foregroundColor: colorScheme.onPrimary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  child: Semantics(
+                    button: true,
+                    label: 'Accept milestone escrow contract offer of \$${offer.budget.toStringAsFixed(0)}',
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
+                      onPressed: () {
+                        chatProvider.updateContractStatus(offer.id, 'ACCEPTED');
+                        AppFeedback.showSuccess(
+                          context,
+                          'Contract Accepted. Escrow milestone locked.',
+                        );
+                      },
+                      icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
+                      label: const Text('Accept Offer', style: TextStyle(fontSize: 12)),
                     ),
-                    onPressed: () {
-                      chatProvider.updateContractStatus(offer.id, 'ACCEPTED');
-                      AppFeedback.showSuccess(
-                        context,
-                        'Contract Accepted. Escrow milestone locked.',
-                      );
-                    },
-                    icon: const Icon(Icons.check_circle_outline_rounded, size: 16),
-                    label: const Text('Accept Offer', style: TextStyle(fontSize: 12)),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: colorScheme.onSurface,
-                      side: BorderSide(color: colorScheme.outlineVariant),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  child: Semantics(
+                    button: true,
+                    label: 'Counter contract terms for proposal',
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colorScheme.onSurface,
+                        side: BorderSide(color: colorScheme.outlineVariant),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
+                      onPressed: () {
+                        chatProvider.updateContractStatus(offer.id, 'COUNTERED');
+                        AppFeedback.showInfo(
+                          context,
+                          'Counter-offer signal sent to client.',
+                        );
+                      },
+                      icon: const Icon(Icons.swap_horiz_rounded, size: 16),
+                      label: const Text('Counter Offer', style: TextStyle(fontSize: 12)),
                     ),
-                    onPressed: () {
-                      chatProvider.updateContractStatus(offer.id, 'COUNTERED');
-                      AppFeedback.showInfo(
-                        context,
-                        'Counter-offer signal sent to client.',
-                      );
-                    },
-                    icon: const Icon(Icons.swap_horiz_rounded, size: 16),
-                    label: const Text('Counter Offer', style: TextStyle(fontSize: 12)),
                   ),
                 ),
               ],

@@ -145,6 +145,7 @@ class _ChatInboxViewState extends State<ChatInboxView> {
           ),
           floatingActionButton: FloatingActionButton(
             heroTag: 'fab_chat_new',
+            tooltip: 'Start new direct contract negotiation',
             mini: isLandscape,
             backgroundColor: colorScheme.primary,
             foregroundColor: colorScheme.onPrimary,
@@ -272,12 +273,15 @@ class _ChatInboxViewState extends State<ChatInboxView> {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
+    return Semantics(
+      button: true,
+      label: 'Conversation with ${conversation.participantName}, ${conversation.role}. Last message: ${conversation.lastMessage}. ${conversation.unreadCount > 0 ? "${conversation.unreadCount} unread" : "All read"}',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isSelected
@@ -390,6 +394,7 @@ class _ChatInboxViewState extends State<ChatInboxView> {
           ),
         ),
       ),
+    ),
     );
   }
 }
